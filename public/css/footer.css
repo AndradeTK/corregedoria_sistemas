@@ -1,0 +1,30 @@
+footer {
+    color: var(--cor_segundaria);
+    background-color: var(--cor_principal3);
+    padding: 0px 10px 0px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 150px;
+    width: 98.5%;
+}
+
+.logo {
+    min-height: 100px;
+    min-width: 200px;
+    max-width: 220px;
+    max-height: 160px;
+}
+
+.socials i {
+    font-size: 20px;
+    margin: 3px;
+}
+
+.socials i:hover {
+    color: rgb(204, 204, 204);
+}
+
+a {
+   color: var(--cor_segundaria);
+}

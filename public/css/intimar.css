@@ -1,0 +1,84 @@
+body {
+    background-image: url('/img/police_back.png');
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+body::-webkit-scrollbar {
+    width: 5px; /* Largura do scroll */
+}
+body::-webkit-scrollbar-thumb {
+    background-color: #888; /* Cor do scroll */
+    border-radius: 10px;
+}
+
+
+
+.container {
+    margin-top: 4%;
+    margin-bottom: 8%;
+    padding: 30px;
+    justify-items: center;
+    background-color: var(--cor_principal3);
+    border: none;
+    box-shadow: 0px 6px 21px 0px rgba(0,0,0,0.69);
+    border-radius: 10px;
+    width: 28%;
+}
+
+.infos {
+    align-content: center;
+    justify-items: center;
+}
+
+.infos h1, p {
+    color: var(--cor_segundaria);
+}
+
+.infos p {
+    font-weight: 200;
+}
+.infos h1 {
+    font-weight: 750;
+}
+
+input {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    color: var(--cor_segundaria);
+    font-weight: 200;
+    height: 30px;
+    width: 100%;
+    background-color: var(--cor_principal3);
+    border: none;
+    border-bottom: 1px solid var(--cor_principal);
+}
+
+form {
+    width: 100%;
+    margin-top: 30px;
+}
+
+form p {
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.botao button {
+    margin-top: 20px;
+    height: 48px;
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+}
+
+.botao button:hover {
+    cursor: pointer;
+    background-color: rgb(220, 220, 220);
+    transition: 0.5 ease-in-out;
+}

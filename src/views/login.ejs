@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/login.css">
+
+    <link rel="shortcut icon" href="/img/corr_logo.png" type="image/x-icon">
+
+    <title>Corregedoria PMC</title>
+</head>
+<%- include("../partials/navbar") %>
+<body>
+
+    <div class="container">
+        <div class="corr_icon">
+            <img src="/img/corr_logo.png" alt="">
+            <div class="corr_icon_infos">
+                <h1>CORREGEDORIA</h1>
+                <p>POLÍCIA MILITAR DA CAPITAL</p>
+            </div>
+        </div>
+        <div class="info">
+            <h1>Faça login na sua conta!</h1>
+        </div>
+        <div class="botao">
+            <a href="/auth/discord"><button>DISCORD</button><i class="ri-external-link-line"></i></a>
+        </div>
+    </div>
+    
+    <%- include("../partials/footer") %>
+</body>
+</html>

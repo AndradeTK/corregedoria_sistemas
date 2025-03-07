@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/intimar.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <link rel="shortcut icon" href="/img/corr_logo.png" type="image/x-icon">
+
+    <title>Corregedoria PMC - Intimação</title>
+</head>
+<%- include("../partials/navbar") %>
+<body>
+  <div class="container">
+    <div class="infos">
+        <h1>INTIMAÇÕES <i class="ri-mail-send-fill"></i></h1>
+        <p>Preencha atentamente o formulário abaixo</p>
+    </div>
+    <form id="intimationForm">
+        <p>ID DISCORD INTIMADO:</p>
+        <input type="text" name="discordId" placeholder="844606209314127882" required>
+        <p>NOME DO INTIMADO:</p>
+        <input type="text" name="nome" placeholder="Logan Andrade" required>
+        <p>PATENTE DO INTIMADO:</p>
+        <input type="text" name="patente" placeholder="Subtenente" required>
+        <p>HORA PARA COMPARECIMENTO:</p>
+        <input type="time" name="hora" required>
+        <p>DATA PARA COMPARECIMENTO:</p>
+        <input type="date" name="data" required>
+        <div class="botao">
+            <button type="submit">INTIMAR</button>
+        </div>
+    </form>
+  </div>
+
+  <%- include("../partials/footer") %>
+</body>
+
+<script>
+   document.getElementById('intimationForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Impede o envio normal do formulário
+
+    const formData = new FormData(this); // Cria o FormData com os dados do formulário
+
+    // Verifique se os dados estão sendo passados corretamente
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
+
+    // Envia os dados via AJAX
+    fetch('/intimacao/enviar', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json()) // Espera um JSON de resposta
+    .then(data => {
+        if (data.success) {
+            // Se o sucesso, exibe o toast de sucesso e atualiza a página
+            Toastify({
+                text: "Intimação enviada com sucesso!",
+                backgroundColor: "linear-gradient(to right, #4CAF50, #81C784)",
+                duration: 3000,
+            }).showToast();
+            
+            // Atualiza a página após o sucesso
+            setTimeout(() => location.reload(), 3000);
+        } else {
+            // Se houve erro, exibe o toast de erro
+            Toastify({
+                text: `Erro: ${data.message}`,
+                backgroundColor: "linear-gradient(to right, #FF5733, #FF7043)",
+                duration: 3000,
+            }).showToast();
+        }
+    })
+    .catch(error => {
+        // Se houver erro na requisição
+        Toastify({
+            text: "Erro ao enviar a intimação. Tente novamente.",
+            backgroundColor: "linear-gradient(to right, #FF5733, #FF7043)",
+            duration: 3000,
+        }).showToast();
+    });
+});
+
+</script>
+
+</html>

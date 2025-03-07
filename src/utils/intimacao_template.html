@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .header, .footer {
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        .footer {
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .content {
+            font-size: 14px;
+            margin-top: 30px;
+        }
+        .content .section-title {
+            font-weight: bold;
+            text-decoration: underline;
+            border: 1px solid red;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>CORREGEDORIA GERAL DA PMC</h1>
+        <p>COMARCA DA CAPITAL - Elgin Avenue, 231 - Capital - MTP</p>
+        <p>Horário de Atendimento: das 08:00 às 23:00</p>
+    </div>
+    
+    <div class="content">
+        <h2 class="section-title">CARTA DE INTIMAÇÃO</h2>
+        <p>No uso de suas atribuições legais, a Corregedoria Geral da Capital INTIMA o(a) Sr(a). <strong>{{nome}}</strong>, no exercício da função de <strong>{{patente}}</strong>, a comparecer ao Departamento de Polícia para prestar esclarecimentos acerca de processo administrativo em andamento.</p>
+
+        <p><strong>Data/Hora:</strong> {{dataComparecimento}} às {{horaComparecimento}} (Horário de Brasília)</p>
+        <p><strong>Local:</strong> 2º Andar da Delegacia de Polícia (DP)</p>
+
+        <h3 class="section-title">Observações:</h3>
+        <ul>
+            <li>Caso o intimado não possa comparecer na data e hora indicadas, deverá entrar em contato com a Corregedoria para o devido reagendamento.</li>
+            <li>O não comparecimento sem justificativa formal poderá acarretar medidas administrativas.</li>
+        </ul>
+
+        <h3 class="section-title">Prazo de Resposta:</h3>
+        <p>O comparecimento deve ser realizado dentro do prazo de 3 (três) dias úteis, contados a partir da data de emissão desta intimação.</p>
+
+        <h3 class="section-title">Disposições Finais:</h3>
+        <ul>
+            <li>Em caso de dúvida ou impossibilidade de cumprimento, o intimado deverá entrar em contato com a Corregedoria pelos meios de comunicação oficiais.</li>
+            <li>O não atendimento poderá resultar em sanções conforme regulamento interno.</li>
+        </ul>
+
+        <p>{{dataEmissao}}, Capital - Metrópole.</p>
+    </div>
+    
+    <div class="footer">
+        <p>Assinado Digitalmente por {{assinatura}}</p>
+    </div>
+</body>
+</html>
