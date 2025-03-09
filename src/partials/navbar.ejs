@@ -30,9 +30,19 @@
 
 <div class="vertical-bar"></div>-->
 <div class="btn_login">
-   
+    <% if (!user) {%>
     <div class="btn_entrar"><a href="http://127.0.0.1:3000/auth/login"><button >ENTRAR</button></a></div>
-   
+    <%} else {%>
+       
+        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" id="user_avatar">
+        <div class="dropdown">
+            <button class="dropdown-button" id="toggleDropdown"><i class="fa-solid fa-bars" style="color: white;"></i></button>
+            <ul class="dropdown-menu" id="dropdownMenu" style="margin-top: 90%;">
+                <li>Logado como <strong><%=user.username%></strong><a href="http://127.0.0.1:3000/auth/logout">Sair</a></li>
+               
+            </ul>
+        </div>
+        <%}%>
 </div>
 </header>
 </body>

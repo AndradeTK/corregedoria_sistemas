@@ -8,6 +8,10 @@ const path = require('path');
 require("dotenv").config();
 require("./src/config/discord-strategy"); // Configuração do Passport
 
+const moment = require("moment");
+
+require("moment/locale/pt-br");
+
 const app = express();
 const multer = require("multer");
 const upload = multer(); // Usamos o multer sem configurações específicas, se não precisar salvar arquivos
@@ -39,4 +43,16 @@ app.use("/intimacao", intimacaoRoutes);
 // Iniciar o bot Discord
 require('./src/bot/index.js');  // IMPORTANDO O BOT AQUI
 
-app.listen(3000, () => console.log("Servidor rodando na porta 3000"));
+app.use((req, res, next) => {
+    res.status(404).send("Desculpe, não conseguimos encontrar essa página.");
+  })
+
+  app.listen(process.env.PORT, async function (erro) {
+    if (erro) {
+      console.log("❌ » Erro :" + erro);
+    } else {
+      console.clear();
+      console.log("✅ » Servidor Online atualizado às " + moment().format('HH:mm') + " na porta " + process.env.PORT + "...");
+    }
+  });
+

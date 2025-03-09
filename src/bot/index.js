@@ -41,7 +41,7 @@ const ALLOWED_USER_ID = '844606209314127882'; // ID permitido para usar o comand
       }
     );
 
-    console.log('Comandos registrados com sucesso!');
+    console.log('⚙️  » Comandos registrados com sucesso!');
   } catch (error) {
     console.error('Erro ao registrar comandos:', error);
   }
@@ -141,8 +141,21 @@ client.on('interactionCreate', async (interaction) => {
 
 // Manipular interações
 client.on('interactionCreate', async (interaction) => {
+    const guildId = '1195033612349886504';
+    let apelido
+    try {
+        // Obtém o servidor
+        const guild = await client.guilds.fetch(guildId);
+        // Obtém o membro pelo discordId
+        const member = await guild.members.fetch(interaction.user.id);
+        // Obtém o apelido (ou nome de usuário se não tiver apelido)
+        apelido = member.nickname || interaction.user.tag;
+    } catch (error) {
+        console.error("Erro ao buscar apelido:", error);
+    }
+
     if (interaction.isCommand() && interaction.commandName === 'intimarembed') {
-        const allowedRoles = [process.env.ROLE_ID, process.env.ROLE_ID2];
+        const allowedRoles = [process.env.ROLE_ID];
         const member = await interaction.guild.members.fetch(interaction.user.id);
         
         // Verifica se o usuário tem um dos cargos permitidos
@@ -227,6 +240,7 @@ client.on('interactionCreate', async (interaction) => {
         await interaction.deferReply({ ephemeral: true });
 
         const data = {
+        discordIdEmitente: interaction.user.id,
           discordId: interaction.fields.getTextInputValue('discord_id'),
           nome: interaction.fields.getTextInputValue('intimado'),
           patente: interaction.fields.getTextInputValue('patente'),
@@ -256,7 +270,7 @@ client.on('interactionCreate', async (interaction) => {
         }
 
         try {
-          const response = await axios.post(`http://localhost:3000/intimacao/enviar`, data, {
+          const response = await axios.post(`http://localhost:3000/intimacao/enviarbot`, data, {
             headers: {
               Authorization: `Bearer teste-teste`
             }
@@ -281,7 +295,7 @@ client.on('interactionCreate', async (interaction) => {
 
 
 
-
+/*
     if (interaction.isButton()) {
         // Botão de Confirmar Leitura
         if (interaction.customId === 'confirmar_leitura') {
@@ -336,10 +350,126 @@ client.on('interactionCreate', async (interaction) => {
             ephemeral: true
           });
         }
-      } else {
-        // Se a interação não for do tipo 'BUTTON'
-        console.log('A interação não é do tipo BUTTON!');
-      }
+      } */
+
+
+        if (!interaction.isButton()) return;
+
+    // Buscar a guild (servidor) manualmente
+    const guild = await client.guilds.fetch('1202751354846707722').catch(() => null);
+    if (!guild) {
+        return interaction.reply({ content: '❌ Erro: Não foi possível acessar o servidor.', ephemeral: true });
+    }
+
+    // Pegar a mensagem original do embed
+    const message = interaction.message;
+
+    // Criar uma nova ActionRow sem o botão pressionado
+    let updatedComponents = message.components.map(row => {
+        return new ActionRowBuilder().addComponents(
+            row.components.filter(component => component.customId !== interaction.customId)
+        );
+    }).filter(row => row.components.length > 0); // Remove ActionRows vazias
+
+    // Botão de Confirmar Leitura
+    if (interaction.customId === 'confirmarLeitura') {
+        const logChannel = await guild.channels.fetch('1308851553506951208').catch(() => null);
+        if (!logChannel) {
+            return interaction.reply({ content: '❌ » Canal de logs não encontrado.', ephemeral: true });
+        }
+      
+        await logChannel.send(`📢 » **${apelido}** (ID: **${interaction.user.id}**) visualizou a intimação.`);
+        await interaction.reply({ content: '✅ » A leitura foi confirmada com sucesso!', ephemeral: true });
+
+        // Editar a mensagem original removendo o botão
+       await message.edit({ components: updatedComponents });
+    }
+
+    // Botão de Reagendar
+    if (interaction.customId === 'reagendar') {
+        const categoriaID = '1335019585467842570';
+        const categoria = await guild.channels.fetch(categoriaID).catch(() => null);
+
+        if (!categoria) {
+            return interaction.reply({ content: '❌ » Não foi possível encontrar a categoria para criar o canal.', ephemeral: true });
+        }
+
+        const canalNome = `intimacao-${interaction.user.username}`;
+        const novoCanal = await guild.channels.create({
+            name: canalNome,
+            type: 0, // Canal de texto
+            parent: categoria.id,
+            permissionOverwrites: [
+                { id: interaction.user.id, allow: ['ViewChannel', 'SendMessages'] },
+                { id: guild.roles.everyone.id, deny: ['ViewChannel'] }
+            ],
+        });
+        
+       /* await novoCanal.send(`🔔 **Novo canal para reagendamento da audiência!** \n \n**Réu:** *${apelido} (${interaction.user.id})*\n\n||<@${interaction.user.id}> <@&1308645932492918814>||`);*/
+       const embed = new EmbedBuilder()
+    .setColor("#000000") // Cor do embed
+    .setTitle("📅 Reagendamento da audiência!")
+    .setDescription(`**Réu:** *${apelido} (${interaction.user.id})*`)
+    .setTimestamp()
+    .setFooter({ text: "Corregedoria PMC", iconURL: interaction.user.displayAvatarURL() });
+
+// Enviar a mensagem com a menção fora do embed
+await novoCanal.send({
+    content: `||<@${interaction.user.id}> <@&1308645932492918814>||`, // Menção fora do embed
+    embeds: [embed]
+});
+        await interaction.reply({ content: `✅ » O canal para reagendamento **${canalNome}** foi criado com sucesso!`, ephemeral: true });
+
+        // Editar a mensagem original removendo o botão
+        await message.edit({ components: updatedComponents });
+    }
+    if (interaction.customId === 'confirmarLeitura2') {
+        const logChannel = await guild.channels.fetch('1308851553506951208').catch(() => null);
+        if (!logChannel) {
+            return interaction.reply({ content: '❌ » Canal de logs não encontrado.', ephemeral: true });
+        }
+      
+        await logChannel.send(`📢 » **${apelido}** (ID: **${interaction.user.id}**) visualizou a intimação.`);
+        await interaction.reply({ content: '✅ » A leitura foi confirmada com sucesso!', ephemeral: true });
+
+    }
+
+    // Botão de Reagendar
+    if (interaction.customId === 'reagendar2') {
+        const categoriaID = '1335019585467842570';
+        const categoria = await guild.channels.fetch(categoriaID).catch(() => null);
+
+        if (!categoria) {
+            return interaction.reply({ content: '❌ » Não foi possível encontrar a categoria para criar o canal.', ephemeral: true });
+        }
+
+        const canalNome = `intimacao-${interaction.user.username}`;
+        const novoCanal = await guild.channels.create({
+            name: canalNome,
+            type: 0, // Canal de texto
+            parent: categoria.id,
+            permissionOverwrites: [
+                { id: interaction.user.id, allow: ['ViewChannel', 'SendMessages'] },
+                { id: guild.roles.everyone.id, deny: ['ViewChannel'] }
+            ],
+        });
+        
+       /* await novoCanal.send(`🔔 **Novo canal para reagendamento da audiência!** \n \n**Réu:** *${apelido} (${interaction.user.id})*\n\n||<@${interaction.user.id}> <@&1308645932492918814>||`);*/
+       const embed = new EmbedBuilder()
+    .setColor("#000000") // Cor do embed
+    .setTitle("📅 Reagendamento da audiência!")
+    .setDescription(`**Réu:** *${apelido} (${interaction.user.id})*`)
+    .setTimestamp()
+    .setFooter({ text: "Corregedoria PMC", iconURL: interaction.user.displayAvatarURL() });
+
+// Enviar a mensagem com a menção fora do embed
+await novoCanal.send({
+    content: `||<@${interaction.user.id}> <@&1308645932492918814>||`, // Menção fora do embed
+    embeds: [embed]
+});
+        await interaction.reply({ content: `✅ » O canal para reagendamento **${canalNome}** foi criado com sucesso!`, ephemeral: true });
+
+    }
 });
 
 // Logar o bot
