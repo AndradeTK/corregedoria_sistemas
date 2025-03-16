@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 30px;
+        }
+        .header {
+         
+            align-items: center;
+            display: flex;
+        }
+        .header, .footer {
+            text-align: start;
+        }
+        .header p {
+            
+           
+            font-size: 17px;
+            margin: 0;
+        }
+        .header-infos {
+            margin-left: 10px;
+        }
+
+        .header .logo img {
+          
+            width: 80px;
+        }
+        .footer {
+           
+            margin-top: 30px;
+        }
+        .content {
+            font-size: 14px;
+            margin-top: 30px;
+        }
+        .content .section-title {
+            font-weight: bold;
+            text-decoration: underline;
+        
+        }
+        .content .section-title-header {
+            text-align: center;
+            background-color: rgb(226, 226, 226);
+            padding: 5px;
+            border: 1px solid black;
+        }
+
+        .infos p{
+            padding: 0;
+            margin: 0;
+            margin-top: 6px;
+        }
+
+        .section-title  {
+            margin-bottom: 0px;
+        }
+
+        .assinatura_mika {
+            text-align: center;
+           
+        }
+
+        .info-ass p{
+            font-size: 12px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .corr-logo img {
+          
+          width: 40px;
+      }
+
+
+      .footer {
+        align-items: center;
+        border: 1px solid black;
+        border-radius: 10px;
+        padding: 4px;
+        display: flex;
+        height: 50px;
+      }
+      .footer .corr-logo {
+        margin-left: 15px;
+        margin-right: 15px;
+      }
+      .footer h1 {
+        font-size: 14px;
+      }
+
+      
+
+      .footer p {
+        font-size: 11px;
+      }
+    </style>
+</head>
+<body>
+    <div class="header">
+       <div class="logo">
+        <img src="https://live.staticflickr.com/65535/54248999839_7c6c9199cf_c.jpg" alt="">
+       </div>
+       <div class="header-infos">
+        <p><strong>CORREGEDORIA GERAL DA PMC</strong></p>
+        <p>COMARCA DA CAPITAL</p>
+       <p> Elgin Avenue, 231 - Capital - MTP</p>
+        <p>Horário de Atendimento: das 09:00 às 23:00</p>
+       </div>
+    </div>
+    
+    <div class="content">
+        <h2 class="section-title-header">DECISÃO</h2>
+        <h3 class="section-title">Vistos.</h3>
+        <p>Trata-se de Processo Administrativo Disciplinar instaurado pela Corregedoria Geral da PMC em face do(a) Sr(a). <strong>{{nome}}</strong>, no exercício da função de <strong>{{patente}}</strong>, vinculado(a) a esta Corporação, em razão de ausência injustificada ao ato de intimação expedido por esta Corregedoria.</p>
+        <p>Conforme consta nos autos, a intimação foi regularmente enviada ao interessado para comparecimento ao Departamento de Polícia. O documento especificava que a ausência imotivada poderia ensejar medidas administrativas conforme regulamento interno da corporação.  </p>
+        <p>Decorrido o prazo concedido para justificativa, verificou-se a inércia do(a) intimado(a), não havendo manifestação acerca da ausência ou pedido de reagendamento.</p>
+        Diante disso, resta configurada a infração disciplinar prevista no Regulamento Disciplinar da PMC, cabendo a aplicação da penalidade correspondente.
+        <br> 
+        <p>Ante o exposto, nos termos do Regulamento Disciplinar da PMC, aplico ao( à) Sr(a). <strong>{{nomee}}</strong> a penalidade de <strong>{{punicao}}</strong>, sem prejuízo de outras sanções administrativas cabíveis, considerando o descumprimento injustificado da intimação expedida por esta Corregedoria.</p>
+    
+    
+       <p><strong>Notifique-se o interessado</strong>  para imediato conhecimento e cumprimento da
+        penalidade aplicada.</p>
+
+      
+        <h3 class="section-title">Registre-se. Cumpra-se.</h3>
+        <h3 class="section-title"></h3>
+       
+        
+       <p>{{dataEmissao}}, Capital - Metrópole.</p>
+
+       <p>Atenciosamente,</p>
+       <div class="assinatura_mika">
+        <img src="https://live.staticflickr.com/65535/54249000089_1a80b5dca6_c.jpg" id="ass_mika" width="130px">
+       </div>
+       <div class="info-ass">
+        <p style="text-align: center;">_____________________________________________</p>
+        <p style="text-align: center;"><strong>Corregedora-Geral da Capital</strong></p>
+       </div>
+
+    </div>
+    
+    <div class="footer">
+        <div class="corr-logo">
+            <img src="https://live.staticflickr.com/65535/54248999839_7c6c9199cf_c.jpg" alt="">
+        </div>
+        <div class="footer-infos">
+            <h1>Documento Assinado Digitalmente</h1>
+            <p>{{userEmissao}} - {{dataEmissao2}} às {{dataEmissao3}}</p>
+        </div>
+    </div>
+
+</body>
+</html>
