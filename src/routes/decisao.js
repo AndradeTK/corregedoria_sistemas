@@ -4,7 +4,8 @@ const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, WebhookClien
 const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
 const { generatePDF, generatePDFDecisao } = require("../utils/generatePDF");
 require("dotenv").config();
-const moment = require("moment");
+const moment = require("moment-timezone");
+
 
 require("moment/locale/pt-br");
 
@@ -13,16 +14,16 @@ bot.login(process.env.BOT_TOKEN);
 const router = express.Router();
 
 
-const logWebhook = new WebhookClient({ url: process.env.intimacaoWebhook });
+const logWebhook = new WebhookClient({ url: process.env.decisaoWebhook });
 
 async function logIntimacao(nome, patente, hora, data, autor) {
     const logEmbed = new EmbedBuilder()
         .setColor("#000000")
-        .setTitle("📜 Nova Intimação Enviada")
+        .setTitle("📜 Nova Decisão Enviada")
         .addFields(
             { name: "👤 Intimado:", value: nome, inline: true },
             { name: "🎖️ Patente:", value: patente, inline: true },
-            { name: "📅 Data:", value: moment(data).format('DD/MM/YYYY'), inline: true },
+            { name: "📅 Data:", value: data, inline: true },
             { name: "⏰ Hora:", value: hora, inline: true },
             { name: "📢 Enviado por:", value: autor, inline: false }
         )
@@ -33,7 +34,7 @@ async function logIntimacao(nome, patente, hora, data, autor) {
 }
 
 
-router.post("/enviar", async (req, res) => {
+/*router.post("/enviar", async (req, res) => {
     try {
         
     const { discordId, nome, patente, hora, data } = req.body;
@@ -122,14 +123,14 @@ router.post("/enviar", async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-});
+});*/
 
 router.post("/enviarbot", async (req, res) => {
     
-    const { discordIdEmitente, discordId, nome, patente, data, hora } = req.body;
+    const { discordIdEmitente, discordId, nome, patente, punicao, prazoRecurso } = req.body;
     
 
-    if (!discordId || !nome || !patente || !data || !hora) {
+    if (!discordId || !nome || !patente || !punicao || !prazoRecurso) {
         return res.status(400).json({ success: false, message: "Todos os campos são obrigatórios." });
     }
 
@@ -150,14 +151,14 @@ router.post("/enviarbot", async (req, res) => {
     const datas = {
         intimado: nome, // Agora o nome do intimado será o apelido do servidor
         patente: patente,
-        dataComparecimento: data,
-        horaComparecimento: hora,
-        dataEmissao: moment().locale("pt-br"),
+        punicao: punicao,
+        prazoRecurso: prazoRecurso,
+        dataEmissao: moment().tz('America/Sao_Paulo'),
         userEmissao: apelido
        
     };
    
-    const pdfPath = await generatePDF(datas);
+    const pdfPath = await generatePDFDecisao(datas);
 
     try {
         const user = await bot.users.fetch(discordId);
@@ -167,9 +168,9 @@ router.post("/enviarbot", async (req, res) => {
 
         const embed = new EmbedBuilder()
             .setColor("#000000")
-            .setTitle("⚖️ Corregedoria Geral PMC - Intimação")
+            .setTitle("⚖️ Corregedoria Geral PMC - Decisão")
             .setDescription(
-                `Olá, **${apelido}**! Você está sendo intimado a comparecer ao departamento para prestar esclarecimentos. **Abra o documento** para mais informações!`
+                `Olá, **${apelido}**! Segue a decisão referente ao processo administrativo disciplinar. **Abra o documento** para mais informações!`
             )
             .setTimestamp(timestamp)
             .setThumbnail(process.env.CORRICON)
@@ -179,16 +180,16 @@ router.post("/enviarbot", async (req, res) => {
             });
 
         const confirmButton = new ButtonBuilder()
-            .setCustomId('confirmarLeitura')
+            .setCustomId('confirmarLeitura3')
             .setLabel('Confirmar Leitura')
             .setStyle(ButtonStyle.Primary);
 
-        const reagendarButton = new ButtonBuilder()
-            .setCustomId('reagendar')
-            .setLabel('Reagendamento')
+        const recursoButton = new ButtonBuilder()
+            .setCustomId('recurso')
+            .setLabel('Abrir Recurso')
             .setStyle(ButtonStyle.Danger);
 
-        const actionRow = new ActionRowBuilder().addComponents(confirmButton, reagendarButton);
+        const actionRow = new ActionRowBuilder().addComponents(confirmButton, recursoButton);
 
         await dm.send({
             embeds: [embed],
@@ -196,9 +197,9 @@ router.post("/enviarbot", async (req, res) => {
             files: [pdfPath]
         });
 
-        await logIntimacao(nome, patente, hora, data, apelido);
+        await logIntimacao(nome, patente, punicao, prazoRecurso, apelido);
 
-        res.json({ success: true, message: "Intimação enviada com sucesso!" });
+        res.json({ success: true, message: "Decisão enviada com sucesso!" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: error.message });

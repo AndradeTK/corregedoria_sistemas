@@ -35,7 +35,7 @@ const ALLOWED_USER_ID = '844606209314127882'; // ID permitido para usar o comand
           },
           {
             name: 'intimarembed',
-            description: 'Cria um embed com botão para intimação.'
+            description: 'Cria um embed com botão para intimação e decisão.'
           },
         ],
       }
@@ -141,7 +141,7 @@ client.on('interactionCreate', async (interaction) => {
 
 // Manipular interações
 client.on('interactionCreate', async (interaction) => {
-    const guildId = '1195033612349886504';
+    const guildId = process.env.GUILD_ID;
     let apelido
     try {
         // Obtém o servidor
@@ -173,7 +173,7 @@ client.on('interactionCreate', async (interaction) => {
              iconURL: process.env.CORRICON
             })
           .setImage(process.env.CORRBANNER)
-          .setDescription('Clique no **botão abaixo** para iniciar o processo de intimação. Você será solicitado a **preencher informações** como o ID do Discord do intimado, nome, patente, data e hora de comparecimento. Após preencher, a intimação será realizada e o intimado receberá o documento **em seu privado**.')
+          .setDescription('Clique no **botão abaixo** para iniciar o processo de intimação ou decisão. Você será solicitado a **preencher informações** como o ID do Discord do intimado, nome, patente, data e hora de comparecimento. Após preencher, a intimação será realizada e o intimado receberá o documento **em seu privado**.')
           .addFields([
             {
                 name: 'Etapas do Processo:',
@@ -191,8 +191,13 @@ client.on('interactionCreate', async (interaction) => {
           .setLabel('INTIMAR')
           .setStyle(ButtonStyle.Secondary)
           .setEmoji('⚖️')
+          const button2 = new ButtonBuilder()
+          .setCustomId('decisao_button')
+          .setLabel('DECISÃO')
+          .setStyle(ButtonStyle.Danger)
+          .setEmoji('⛔')
     
-        const row = new ActionRowBuilder().addComponents(button);
+        const row = new ActionRowBuilder().addComponents(button, button2);
     
         await interaction.reply({ embeds: [embed], components: [row] });
     }
@@ -288,7 +293,98 @@ client.on('interactionCreate', async (interaction) => {
         }
     }
 
+// slaaaaaaaaaa
 
+if (interaction.isButton() && interaction.customId === 'decisao_button') {
+  const allowedRoles = [process.env.ROLE_ID, process.env.ROLE_ID2];
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  
+  // Verifica se o usuário tem um dos cargos permitidos
+  if (!allowedRoles.some(role => member.roles.cache.has(role))) {
+    return interaction.reply({
+      content: '❌ » Você não tem permissão para usar este comando.',
+      ephemeral: true
+    });
+  }
+  // Criar o modal
+  const modal = new ModalBuilder()
+    .setCustomId('decisao_modal')
+    .setTitle('Realizar Decisão');
+
+  const fields = [
+    { id: 'discord_id', label: 'ID Discord', placeholder: '844606209314127882' },
+    { id: 'intimado', label: 'Intimado', placeholder: 'Logan Andrade' },
+    { id: 'patente', label: 'Patente Intimado', placeholder: 'Subtenente' },
+    { id: 'punicao', label: 'Punição', placeholder: 'Advertência 2' },
+    { id: 'prazoRecurso', label: 'Prazo de Recurso', placeholder: '3 dias' },
+  ];
+
+  const rows = fields.map((field) =>
+    new ActionRowBuilder().addComponents(
+      new TextInputBuilder()
+        .setCustomId(field.id)
+        .setLabel(field.label)
+        .setPlaceholder(field.placeholder)
+        .setStyle(TextInputStyle.Short)
+    )
+  );
+
+  modal.addComponents(rows);
+
+  await interaction.showModal(modal);
+}
+
+if (interaction.type === InteractionType.ModalSubmit && interaction.customId === 'decisao_modal') {
+  await interaction.deferReply({ ephemeral: true });
+
+  const data = {
+  discordIdEmitente: interaction.user.id,
+    discordId: interaction.fields.getTextInputValue('discord_id'),
+    nome: interaction.fields.getTextInputValue('intimado'),
+    patente: interaction.fields.getTextInputValue('patente'),
+    punicao: interaction.fields.getTextInputValue('punicao'),
+    prazoRecurso: interaction.fields.getTextInputValue('prazoRecurso')
+  };
+
+  try {
+    const user = await client.users.fetch(data.discordId);
+  } catch (error) {
+    await interaction.editReply({
+      content: '❌ » O ID Discord fornecido não é válido. Verifique o ID e tente novamente.',
+      ephemeral: true
+    });
+    return;
+  }
+
+  try {
+    const user = await client.users.fetch(data.discordId);
+    await user.send('Olá! Como vai?');
+  } catch (error) {
+    await interaction.editReply({
+      content: '❌ » O intimado não possui DMs abertas ou o ID fornecido está incorreto.',
+      ephemeral: true
+    });
+    return;
+  }
+
+  try {
+    const response = await axios.post(`http://localhost:3000/decisao/enviarbot`, data, {
+      headers: {
+        Authorization: `Bearer teste-teste`
+      }
+    });
+
+    await interaction.editReply({
+      content: `✅ » Decisão de ${data.nome} foi realizada com sucesso!`,
+  });
+  } catch (error) {
+    console.error('Erro ao enviar dados para a rota:', error);
+    await interaction.reply({
+      content: '❌ Erro ao realizar a intimação. Tente novamente mais tarde.',
+      ephemeral: true
+    });
+  }
+}
 
 
 
@@ -356,7 +452,7 @@ client.on('interactionCreate', async (interaction) => {
         if (!interaction.isButton()) return;
 
     // Buscar a guild (servidor) manualmente
-    const guild = await client.guilds.fetch('1202751354846707722').catch(() => null);
+    const guild = await client.guilds.fetch(process.env.GUILD_ID).catch(() => null);
     if (!guild) {
         return interaction.reply({ content: '❌ Erro: Não foi possível acessar o servidor.', ephemeral: true });
     }
@@ -387,14 +483,14 @@ client.on('interactionCreate', async (interaction) => {
 
     // Botão de Reagendar
     if (interaction.customId === 'reagendar') {
-        const categoriaID = '1335019585467842570';
+        const categoriaID = process.env.CATEGORIA_ID;
         const categoria = await guild.channels.fetch(categoriaID).catch(() => null);
 
         if (!categoria) {
             return interaction.reply({ content: '❌ » Não foi possível encontrar a categoria para criar o canal.', ephemeral: true });
         }
 
-        const canalNome = `intimacao-${interaction.user.username}`;
+        const canalNome = `✉️┋intimacao-${interaction.user.username}`;
         const novoCanal = await guild.channels.create({
             name: canalNome,
             type: 0, // Canal de texto
@@ -407,15 +503,33 @@ client.on('interactionCreate', async (interaction) => {
         
        /* await novoCanal.send(`🔔 **Novo canal para reagendamento da audiência!** \n \n**Réu:** *${apelido} (${interaction.user.id})*\n\n||<@${interaction.user.id}> <@&1308645932492918814>||`);*/
        const embed = new EmbedBuilder()
-    .setColor("#000000") // Cor do embed
-    .setTitle("📅 Reagendamento da audiência!")
-    .setDescription(`**Réu:** *${apelido} (${interaction.user.id})*`)
-    .setTimestamp()
-    .setFooter({ text: "Corregedoria PMC", iconURL: interaction.user.displayAvatarURL() });
+       .setColor('#000000')
+       .setAuthor({
+           name: 'Corregedoria Geral PMC - Reagendamento da Intimação',
+           iconURL: process.env.CORRICON
+       })
+       .setImage(process.env.CORRBANNER)
+       .setDescription(`Olá, **${apelido} (${interaction.user.id})**! Caso precise reagendar a data da intimação, você pode solicitar um **reagendamento**. Siga as etapas abaixo para garantir que seu pedido seja analisado corretamente.`)
+       .addFields([
+           {
+               name: '📌 Etapas do Processo:',
+               value: '**1.** Clique no botão para iniciar o reagendamento.\n**2.** Mande abaixo informações necessárias, incluindo nome, patente, justificativa, data e horário disponiveis.\n **3.** Aguarde a análise da corregedoria.',
+               inline: false
+           },
+           {
+               name: '⚠ Importante:',
+               value: 'O pedido de reagendamento não troca a data automaticamente. Ele será analisado conforme a agenda da Corregedoria.',
+               inline: false
+           }
+       ])
+       .setFooter({
+           text: 'Sistemas PMC',
+           iconURL: process.env.CORRICON
+       });
 
 // Enviar a mensagem com a menção fora do embed
 await novoCanal.send({
-    content: `||<@${interaction.user.id}> <@&1308645932492918814>||`, // Menção fora do embed
+    content: `||<@${interaction.user.id}> <@&${process.env.ROLE_ID}>||`, // Menção fora do embed
     embeds: [embed]
 });
         await interaction.reply({ content: `✅ » O canal para reagendamento **${canalNome}** foi criado com sucesso!`, ephemeral: true });
@@ -424,7 +538,7 @@ await novoCanal.send({
         await message.edit({ components: updatedComponents });
     }
     if (interaction.customId === 'confirmarLeitura2') {
-        const logChannel = await guild.channels.fetch('1308851553506951208').catch(() => null);
+        const logChannel = await guild.channels.fetch(process.env.AR_CANAL).catch(() => null);
         if (!logChannel) {
             return interaction.reply({ content: '❌ » Canal de logs não encontrado.', ephemeral: true });
         }
@@ -436,7 +550,7 @@ await novoCanal.send({
 
     // Botão de Reagendar
     if (interaction.customId === 'reagendar2') {
-        const categoriaID = '1335019585467842570';
+        const categoriaID = process.env.CATEGORIA_ID;
         const categoria = await guild.channels.fetch(categoriaID).catch(() => null);
 
         if (!categoria) {
@@ -456,20 +570,116 @@ await novoCanal.send({
         
        /* await novoCanal.send(`🔔 **Novo canal para reagendamento da audiência!** \n \n**Réu:** *${apelido} (${interaction.user.id})*\n\n||<@${interaction.user.id}> <@&1308645932492918814>||`);*/
        const embed = new EmbedBuilder()
-    .setColor("#000000") // Cor do embed
-    .setTitle("📅 Reagendamento da audiência!")
-    .setDescription(`**Réu:** *${apelido} (${interaction.user.id})*`)
-    .setTimestamp()
-    .setFooter({ text: "Corregedoria PMC", iconURL: interaction.user.displayAvatarURL() });
+       .setColor('#000000')
+       .setAuthor({
+           name: 'Corregedoria Geral PMC - Reagendamento da Intimação',
+           iconURL: process.env.CORRICON
+       })
+       .setImage(process.env.CORRBANNER)
+       .setDescription(`Olá, **${apelido} (${interaction.user.id})**! Caso precise reagendar a data da intimação, você pode solicitar um **reagendamento**. Siga as etapas abaixo para garantir que seu pedido seja analisado corretamente.`)
+       .addFields([
+           {
+               name: '📌 Etapas do Processo:',
+               value: '**1.** Clique no botão para iniciar o reagendamento.\n**2.** Mande abaixo informações necessárias, incluindo nome, patente, justificativa, data e horário disponiveis.\n **3.** Aguarde a análise da corregedoria.',
+               inline: false
+           },
+           {
+               name: '⚠ Importante:',
+               value: 'O pedido de reagendamento não troca a data automaticamente. Ele será analisado conforme a agenda da Corregedoria.',
+               inline: false
+           }
+       ])
+       .setFooter({
+           text: 'Sistemas PMC',
+           iconURL: process.env.CORRICON
+       });
 
 // Enviar a mensagem com a menção fora do embed
 await novoCanal.send({
-    content: `||<@${interaction.user.id}> <@&1308645932492918814>||`, // Menção fora do embed
+    content: `||<@${interaction.user.id}> <@&${process.env.ROLE_ID}>||`, // Menção fora do embed
     embeds: [embed]
 });
         await interaction.reply({ content: `✅ » O canal para reagendamento **${canalNome}** foi criado com sucesso!`, ephemeral: true });
 
     }
+
+
+    /*Decisao*/
+
+    if (interaction.customId === 'confirmarLeitura3') {
+      const logChannel = await guild.channels.fetch(process.env.AR_CANAL).catch(() => null);
+      if (!logChannel) {
+          return interaction.reply({ content: '❌ » Canal de logs não encontrado.', ephemeral: true });
+      }
+    
+      await logChannel.send(`📢 » **${apelido}** (ID: **${interaction.user.id}**) visualizou a decisão.`);
+      await interaction.reply({ content: '✅ » A leitura foi confirmada com sucesso!', ephemeral: true });
+
+      // Editar a mensagem original removendo o botão
+     await message.edit({ components: updatedComponents });
+  }
+  
+  if (interaction.customId === 'recurso') {
+      const categoriaID = process.env.CATEGORIA_ID;
+      const categoria = await guild.channels.fetch(categoriaID).catch(() => null);
+
+      if (!categoria) {
+          return interaction.reply({ content: '❌ » Não foi possível encontrar a categoria para criar o canal.', ephemeral: true });
+      }
+
+      const canalNome = `⚖️┋decisao-${interaction.user.username}`;
+      const novoCanal = await guild.channels.create({
+          name: canalNome,
+          type: 0, // Canal de texto
+          parent: categoria.id,
+          permissionOverwrites: [
+              { id: interaction.user.id, allow: ['ViewChannel', 'SendMessages'] },
+              { id: guild.roles.everyone.id, deny: ['ViewChannel'] }
+          ],
+      });
+      
+     /* await novoCanal.send(`🔔 **Novo canal para reagendamento da audiência!** \n \n**Réu:** *${apelido} (${interaction.user.id})*\n\n||<@${interaction.user.id}> <@&1308645932492918814>||`);*/
+     const embed = new EmbedBuilder()
+     .setColor('#000000')
+    .setAuthor({
+        name: 'Corregedoria Geral PMC - Recurso de Decisão',
+        iconURL: process.env.CORRICON
+    })
+    .setImage(process.env.CORRDECISAO)
+    .setDescription(`Olá, **${apelido} (${interaction.user.id})**! Caso discorde da decisão aplicada, você pode solicitar um **recurso** para revisão. Siga as etapas abaixo para garantir que seu pedido seja analisado corretamente.`)
+    .addFields([
+        {
+            name: '📌 Etapas do Processo:',
+            value: '**1.** Clique no botão para iniciar o pedido de recurso.\n**2.** Mande abaixo informações necessárias, incluindo nome, patente e justificativa.\n**3.** Anexe provas como vídeos, prints ou testemunhas.\n**4.** Aguarde a análise da corregedoria.',
+            inline: false
+        },
+        {
+            name: '⚠ Importante:',
+            value: 'O pedido de recurso não suspende automaticamente a punição aplicada. Ele será analisado conforme as evidências apresentadas.',
+            inline: false
+        }
+    ])
+    .setFooter({
+        text: 'Sistemas PMC',
+        iconURL: process.env.CORRICON
+    });
+     /*
+  .setColor("#000000") // Cor do embed
+  .setTitle("🎓 Recurso da Decisão!")
+  .setDescription(`**Réu:** *${apelido} (${interaction.user.id})*`)
+  .setTimestamp()
+  .setFooter({ text: "Corregedoria PMC", iconURL: interaction.user.displayAvatarURL() });*/
+
+// Enviar a mensagem com a menção fora do embed
+await novoCanal.send({
+  content: `||<@${interaction.user.id}> <@&${process.env.ROLE_ID}>||`, // Menção fora do embed
+  embeds: [embed]
+});
+      await interaction.reply({ content: `✅ » O canal para recurso **${canalNome}** foi criado com sucesso!`, ephemeral: true });
+
+      // Editar a mensagem original removendo o botão
+      await message.edit({ components: updatedComponents });
+  }
 });
 
 // Logar o bot

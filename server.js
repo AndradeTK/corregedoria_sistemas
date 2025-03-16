@@ -4,6 +4,7 @@ const passport = require("passport");
 const authRoutes = require("./src/routes/auth");
 const indexRoutes = require("./src/routes/index");
 const intimacaoRoutes = require("./src/routes/intimacao");
+const decisaoRoutes = require("./src/routes/decisao");
 const path = require('path');
 require("dotenv").config();
 require("./src/config/discord-strategy"); // Configuração do Passport
@@ -39,6 +40,7 @@ app.use(passport.session());
 app.use("/", indexRoutes);
 app.use("/auth", authRoutes);
 app.use("/intimacao", intimacaoRoutes);
+app.use("/decisao", decisaoRoutes);
 
 // Iniciar o bot Discord
 require('./src/bot/index.js');  // IMPORTANDO O BOT AQUI
